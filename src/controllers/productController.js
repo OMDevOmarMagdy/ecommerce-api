@@ -64,10 +64,29 @@ const deleteProduct = async (req, res, next) => {
   }
 };
 
+
+const getRecommendations = async (req, res, next) => {
+
+  try {
+    // get product 
+    const recommendations = await productService.getRecommendations(req.params.id);
+
+    // send response
+    res.json({
+      message: "Recommendations fetched successfully",
+      recommendations,
+    });
+    
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getAllProducts,
   getProductById,
   createProduct,
   updateProduct,
   deleteProduct,
+  getRecommendations,
 };

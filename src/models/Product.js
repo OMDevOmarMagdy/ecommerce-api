@@ -48,12 +48,17 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    tags: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,
   }
 );
 
+// Indexes for performance
 productSchema.index({ category: 1, price: 1 });
 productSchema.index({ price: 1 });
 

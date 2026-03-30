@@ -40,6 +40,55 @@ const getProductById = async (id) => {
   return product;
 };
 
+
+function calculateScore(product, p) {
+  let score= 0;
+
+  // if brand is same as product brand
+  if(p.brand === product.brand){
+    score += 5;
+  }
+  
+  // difference in price 
+  const priceDiff = Math.abs(p.price - product.price);
+  score += Math.max(0, 5 - priceDiff/100); 
+
+  // if tags are same as product tags
+  const commonTags = p.tags.filter((tag) => product.tags.includes(tag));
+  score += commonTags.length * 2;
+  return { ...p, score };
+}
+
+const getRecommendations = async ( id ) =>{
+  // get product 
+  const product = await Product.findById(id);
+  if (!product) {
+    throw new Error('Product not found');
+  }
+  // get products 
+  const products = await Product.find(
+    {
+      category: product.category,
+      _id: { $ne: product._id },
+      price: {
+        $lte: product.price * 1.5,
+        $gte: product.price * 0.5,
+      }
+    }
+  );
+  // calculate the score
+  const scoredProducts = products.map((p) => {
+    const score = calculateScore(product, p);
+    return { product: p, score };
+  });
+
+  // sort the products by socre in an descending order
+  scoredProducts.sort((a, b) => b.score - a.score);
+  
+  // return the top 5 products
+  return scoredProducts.slice(0, 5).map((p) => p.product);
+}
+
 const createProduct = async (productData) => {
   const product = await Product.findOne({ name: productData.name });
   if (product) {
@@ -75,4 +124,5 @@ module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
+  getRecommendations,
 };
